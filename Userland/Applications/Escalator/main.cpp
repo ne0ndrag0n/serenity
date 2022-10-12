@@ -40,7 +40,7 @@ ErrorOr<int> serenity_main(Main::Arguments arguments)
     }
 
     auto current_user = TRY(Core::Account::self());
-    auto window = TRY(EscalatorWindow::try_create(executable_path.value(), command, description, current_user, preserve_env));
+    auto window = TRY(EscalatorWindow::try_create(EscalatorWindow::Options { executable_path.value(), command, description, current_user, preserve_env }));
 
     if (current_user.uid() != 0) {
         window->show();

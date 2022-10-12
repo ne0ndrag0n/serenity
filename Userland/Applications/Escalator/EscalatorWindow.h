@@ -20,17 +20,25 @@
 class EscalatorWindow final : public GUI::Window {
     C_OBJECT(EscalatorWindow)
 public:
+    struct Options {
+        StringView executable;
+        Vector<StringView> arguments;
+        StringView description;
+        Core::Account current_user;
+        bool preserve_env;
+    };
+
     virtual ~EscalatorWindow() override = default;
 
     ErrorOr<void> execute_command();
 
 private:
-    EscalatorWindow(StringView command, Vector<StringView> arguments, StringView description, Core::Account current_user, bool preserve_env);
+    EscalatorWindow(Options const& options);
 
     ErrorOr<void> check_password();
 
     Vector<StringView> m_arguments;
-    StringView m_command;
+    StringView m_executable;
     Core::Account m_current_user;
     bool m_preserve_env;
 

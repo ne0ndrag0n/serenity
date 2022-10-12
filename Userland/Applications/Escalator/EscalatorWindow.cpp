@@ -17,13 +17,13 @@
 #include <LibGUI/Widget.h>
 #include <unistd.h>
 
-EscalatorWindow::EscalatorWindow(StringView command, Vector<StringView> arguments, StringView description, Core::Account current_user, bool preserve_env)
-    : m_arguments(arguments)
-    , m_command(command)
-    , m_current_user(current_user)
-    , m_preserve_env(preserve_env)
+EscalatorWindow::EscalatorWindow(EscalatorWindow::Options const& options)
+    : m_arguments(options.arguments)
+    , m_executable(options.executable)
+    , m_current_user(options.current_user)
+    , m_preserve_env(options.preserve_env)
 {
-    auto app_icon = GUI::FileIconProvider::icon_for_executable(command);
+    auto app_icon = GUI::FileIconProvider::icon_for_executable(m_executable);
 
     set_title("Run as Root");
     set_icon(app_icon.bitmap_for_size(16));
@@ -37,10 +37,10 @@ EscalatorWindow::EscalatorWindow(StringView command, Vector<StringView> argument
     RefPtr<GUI::Label> app_label = *main_widget.find_descendant_of_type_named<GUI::Label>("description");
 
     String prompt;
-    if (description.is_empty())
-        prompt = String::formatted("{} requires root access. Please enter password for user \"{}\".", arguments[0], m_current_user.username());
+    if (options.description.is_empty())
+        prompt = String::formatted("{} requires root access. Please enter password for user \"{}\".", m_arguments[0], m_current_user.username());
     else
-        prompt = description;
+        prompt = options.description;
 
     app_label->set_text(prompt);
 
@@ -112,6 +112,6 @@ ErrorOr<void> EscalatorWindow::execute_command()
     TRY(root_user.login());
 
     TRY(Core::System::pledge("stdio sendfd rpath exec"));
-    TRY(Core::System::exec(m_command, m_arguments, Core::System::SearchInPath::No, exec_environ));
+    TRY(Core::System::exec(m_executable, m_arguments, Core::System::SearchInPath::No, exec_environ));
     VERIFY_NOT_REACHED();
 }
