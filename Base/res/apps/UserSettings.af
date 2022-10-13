@@ -1,0 +1,5 @@
+[App]
+Name=Users
+Executable=/bin/UserSettings
+Category=Settings
+Description=Manage user accounts and user account groups
