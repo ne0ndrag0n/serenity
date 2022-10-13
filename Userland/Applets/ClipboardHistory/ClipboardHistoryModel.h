@@ -8,11 +8,16 @@
 
 #pragma once
 
+#include <AK/NonnullRefPtr.h>
+#include <AK/String.h>
 #include <AK/Vector.h>
 #include <LibConfig/Listener.h>
 #include <LibCore/DateTime.h>
 #include <LibGUI/Clipboard.h>
 #include <LibGUI/Model.h>
+#include <LibGUI/ModelIndex.h>
+#include <LibGUI/ModelRole.h>
+#include <LibGUI/Variant.h>
 
 class ClipboardHistoryModel final : public GUI::Model
     , public GUI::Clipboard::ClipboardClient
