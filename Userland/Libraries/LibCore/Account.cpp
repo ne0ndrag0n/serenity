@@ -125,6 +125,43 @@ ErrorOr<Account> Account::from_uid(uid_t uid, [[maybe_unused]] Read options)
     return from_passwd(*pwd, spwd);
 }
 
+ErrorOr<Vector<Account>> Account::all([[maybe_unused]] Read options)
+{
+    Vector<Account> accounts;
+
+    setpwent();
+    errno = 0;
+    while (auto const* pwd = getpwent()) {
+        spwd spwd_item = {};
+#ifndef AK_OS_BSD_GENERIC
+        if (options != Read::PasswdOnly) {
+            auto spwd_result = Core::System::getspnam({ pwd->pw_name, strlen(pwd->pw_name) });
+            if (spwd_result.is_error()) {
+                endpwent();
+                return spwd_result.error();
+            }
+
+            auto maybe_spwd = spwd_result.value();
+            if (!maybe_spwd.has_value()) {
+                endpwent();
+                return Error::from_string_literal("No shadow entry for user");
+            }
+
+            spwd_item = maybe_spwd.release_value();
+        }
+#endif
+
+        spwd* const spwd = &spwd_item;
+        accounts.append({ *pwd, *spwd, get_extra_gids(*pwd) });
+    }
+    endpwent();
+
+    if (errno)
+        return Error::from_errno(errno);
+
+    return accounts;
+}
+
 bool Account::authenticate(SecretString const& password) const
 {
     // If there was no shadow entry for this account, authentication always fails.
