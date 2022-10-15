@@ -6,8 +6,10 @@
 
 #include <AK/CharacterTypes.h>
 #include <AK/ScopeGuard.h>
+#include <LibCore/File.h>
 #include <LibCore/Group.h>
 #include <LibCore/System.h>
+#include <errno.h>
 
 namespace Core {
 
@@ -59,6 +61,31 @@ ErrorOr<void> Group::add_group(Group& group)
     return {};
 }
 #endif
+
+ErrorOr<Vector<Group>> Group::all()
+{
+    Vector<Group> groups;
+
+    setgrent();
+    errno = 0;
+    for (auto const* gr = getgrent(); gr; gr = getgrent()) {
+        if (errno) {
+            endgrent();
+            return Error::from_errno(errno);
+        }
+
+        Vector<String> members;
+        for (size_t i = 0; gr->gr_mem[i]; ++i)
+            members.append(*gr->gr_mem);
+
+        groups.append({ gr->gr_name, gr->gr_gid, members });
+
+        errno = 0;
+    }
+    endgrent();
+
+    return groups;
+}
 
 Group::Group(String name, gid_t id, Vector<String> members)
     : m_name(move(name))
