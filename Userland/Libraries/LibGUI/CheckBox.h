@@ -7,7 +7,10 @@
 
 #pragma once
 
+#include <AK/RefPtr.h>
+#include <AK/String.h>
 #include <LibGUI/AbstractButton.h>
+#include <LibGfx/Bitmap.h>
 
 namespace GUI {
 
@@ -18,6 +21,11 @@ public:
     virtual ~CheckBox() override = default;
 
     virtual void click(unsigned modifiers = 0) override;
+
+    void set_icon(Gfx::Bitmap const*);
+    void set_icon_from_path(String const&);
+    Gfx::Bitmap const* icon() const { return m_icon.ptr(); }
+    Gfx::Bitmap* icon() { return m_icon.ptr(); }
 
     bool is_autosize() const { return m_autosize; }
     void set_autosize(bool);
@@ -43,6 +51,7 @@ private:
 
     bool m_autosize { false };
     CheckBoxPosition m_checkbox_position { CheckBoxPosition::Left };
+    RefPtr<Gfx::Bitmap> m_icon;
 };
 
 }
