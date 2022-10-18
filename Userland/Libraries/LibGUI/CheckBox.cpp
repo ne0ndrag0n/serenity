@@ -34,6 +34,24 @@ CheckBox::CheckBox(String text)
     set_preferred_size({ SpecialDimension::OpportunisticGrow, 22 });
 }
 
+void CheckBox::set_icon(Gfx::Bitmap const* icon)
+{
+    if (m_icon == icon)
+        return;
+    m_icon = icon;
+    update();
+}
+
+void CheckBox::set_icon_from_path(String const& path)
+{
+    auto maybe_bitmap = Gfx::Bitmap::try_load_from_file(path);
+    if (maybe_bitmap.is_error()) {
+        dbgln("Unable to load bitmap `{}` for label icon", path);
+        return;
+    }
+    set_icon(maybe_bitmap.release_value());
+}
+
 void CheckBox::paint_event(PaintEvent& event)
 {
     Painter painter(*this);
@@ -60,6 +78,11 @@ void CheckBox::paint_event(PaintEvent& event)
         box_rect.set_right_without_resize(rect().right());
 
     Gfx::StylePainter::paint_check_box(painter, box_rect, palette(), is_enabled(), is_checked(), is_being_pressed());
+
+    if (m_icon) {
+        painter.blit(Gfx::IntPoint { text_rect.x(), box_rect.y() - 3 }, *m_icon, m_icon->rect());
+        text_rect.set_x(text_rect.x() + m_icon->rect().width() + s_horizontal_padding);
+    }
 
     paint_text(painter, text_rect, font(), Gfx::TextAlignment::TopLeft);
 
