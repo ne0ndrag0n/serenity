@@ -7,23 +7,18 @@
 
 #include "EscalatorWindow.h"
 #include <AK/Assertions.h>
-#include <Applications/Escalator/EscalatorGML.h>
+#include <LibAuth/EscalatorGML.h>
+#include <LibAuth/EscalatorWindow.h>
 #include <LibCore/SecretString.h>
-#include <LibCore/System.h>
-#include <LibGUI/FileIconProvider.h>
-#include <LibGUI/Icon.h>
 #include <LibGUI/Label.h>
 #include <LibGUI/MessageBox.h>
 #include <LibGUI/Widget.h>
-#include <unistd.h>
 
-EscalatorWindow::EscalatorWindow(StringView executable, Vector<StringView> arguments, EscalatorWindow::Options const& options)
-    : m_arguments(arguments)
-    , m_executable(executable)
+EscalatorWindow::EscalatorWindow(EscalatorWindow::Options const& options)
+    : GUI::Window(options.parent_window)
     , m_current_user(options.current_user)
-    , m_preserve_env(options.preserve_env)
 {
-    auto app_icon = GUI::FileIconProvider::icon_for_executable(m_executable);
+    auto app_icon = options.icon.has_value() ? options.icon.value() : GUI::Icon::default_icon("app-escalator"sv);
 
     set_title("Run as Root");
     set_icon(app_icon.bitmap_for_size(16));
@@ -36,13 +31,7 @@ EscalatorWindow::EscalatorWindow(StringView executable, Vector<StringView> argum
 
     RefPtr<GUI::Label> app_label = *main_widget.find_descendant_of_type_named<GUI::Label>("description");
 
-    String prompt;
-    if (options.description.is_empty())
-        prompt = String::formatted("{} requires root access. Please enter password for user \"{}\".", m_arguments[0], m_current_user.username());
-    else
-        prompt = options.description;
-
-    app_label->set_text(prompt);
+    app_label->set_text(options.description);
 
     m_icon_image_widget = *main_widget.find_descendant_of_type_named<GUI::ImageWidget>("icon");
     m_icon_image_widget->set_bitmap(app_icon.bitmap_for_size(32));
@@ -59,10 +48,31 @@ EscalatorWindow::EscalatorWindow(StringView executable, Vector<StringView> argum
 
     m_cancel_button = *main_widget.find_descendant_of_type_named<GUI::DialogButton>("cancel_button");
     m_cancel_button->on_click = [this](auto) {
-        close();
+        if (m_event_loop)
+            m_event_loop->quit(false);
+        else
+            close();
     };
 
     m_password_input = *main_widget.find_descendant_of_type_named<GUI::PasswordBox>("password");
+}
+
+void EscalatorWindow::close()
+{
+    GUI::Window::close();
+    if (m_event_loop)
+        m_event_loop->quit(false);
+}
+
+bool EscalatorWindow::request_authorization()
+{
+    VERIFY(!m_event_loop);
+    m_event_loop = make<Core::EventLoop>();
+
+    show();
+    auto result = m_event_loop->exec();
+    remove_from_parent();
+    return static_cast<bool>(result);
 }
 
 ErrorOr<void> EscalatorWindow::check_password()
@@ -81,34 +91,9 @@ ErrorOr<void> EscalatorWindow::check_password()
         return {};
     }
 
-    // Caller will close Escalator if error is returned.
-    TRY(execute_command());
-    VERIFY_NOT_REACHED();
-}
-
-ErrorOr<void> EscalatorWindow::execute_command()
-{
-    // Translate environ to format for Core::System::exec.
-    Vector<StringView> exec_environment;
-    for (size_t i = 0; environ[i]; ++i) {
-        StringView env_view { environ[i], strlen(environ[i]) };
-        auto maybe_needle = env_view.find('=');
-
-        if (!maybe_needle.has_value())
-            continue;
-
-        if (!m_preserve_env && env_view.substring_view(0, maybe_needle.value()) != "TERM"sv)
-            continue;
-
-        exec_environment.append(env_view);
+    if (m_event_loop) {
+        m_event_loop->quit(true);
     }
 
-    // Escalate process privilege to root user.
-    TRY(Core::System::seteuid(0));
-    auto root_user = TRY(Core::Account::from_uid(0));
-    TRY(root_user.login());
-
-    TRY(Core::System::pledge("stdio sendfd rpath exec"));
-    TRY(Core::System::exec(m_executable, m_arguments, Core::System::SearchInPath::No, exec_environment));
-    VERIFY_NOT_REACHED();
+    return {};
 }

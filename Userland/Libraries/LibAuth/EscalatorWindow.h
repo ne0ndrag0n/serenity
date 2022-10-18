@@ -7,12 +7,14 @@
 
 #pragma once
 
+#include <AK/Optional.h>
+#include <AK/OwnPtr.h>
 #include <AK/String.h>
-#include <AK/StringView.h>
-#include <AK/Vector.h>
 #include <LibCore/Account.h>
+#include <LibCore/EventLoop.h>
 #include <LibCore/Object.h>
 #include <LibGUI/Button.h>
+#include <LibGUI/Icon.h>
 #include <LibGUI/ImageWidget.h>
 #include <LibGUI/TextBox.h>
 #include <LibGUI/Window.h>
@@ -21,27 +23,29 @@ class EscalatorWindow final : public GUI::Window {
     C_OBJECT(EscalatorWindow)
 public:
     struct Options {
-        StringView description;
+        Optional<GUI::Icon> icon;
+        String description;
         Core::Account current_user;
-        bool preserve_env { false };
+        GUI::Window* parent_window { nullptr };
     };
 
     virtual ~EscalatorWindow() override = default;
 
-    ErrorOr<void> execute_command();
+    virtual void close() override;
+
+    bool request_authorization();
 
 private:
-    EscalatorWindow(StringView executable, Vector<StringView> arguments, Options const& options);
+    EscalatorWindow(Options const& options);
 
     ErrorOr<void> check_password();
 
-    Vector<StringView> m_arguments;
-    StringView m_executable;
     Core::Account m_current_user;
-    bool m_preserve_env { false };
 
     RefPtr<GUI::ImageWidget> m_icon_image_widget;
     RefPtr<GUI::Button> m_ok_button;
     RefPtr<GUI::Button> m_cancel_button;
     RefPtr<GUI::PasswordBox> m_password_input;
+
+    OwnPtr<Core::EventLoop> m_event_loop;
 };
