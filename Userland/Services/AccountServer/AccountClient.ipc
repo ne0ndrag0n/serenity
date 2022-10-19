@@ -1,0 +1,4 @@
+endpoint AccountClient
+{
+    user_password_updated(i32 promise_id, bool success) =|
+}
