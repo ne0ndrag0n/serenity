@@ -10,6 +10,7 @@ add_subdirectory(WebServer)
 add_subdirectory(WebSocket)
 
 if (SERENITYOS)
+    add_subdirectory(AccountServer)
     add_subdirectory(AudioServer)
     add_subdirectory(ChessEngine)
     add_subdirectory(Clipboard)
