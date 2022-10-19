@@ -1,0 +1,7 @@
+endpoint AccountClient
+{
+    user_password_updated(i32 promise_id, bool success) =|
+    user_settings_updated(i32 promise_id, bool success) =|
+    user_deleted(i32 promise_id, bool success) =|
+    user_added(i32 promise_id, i32 new_user_id) =|
+}
