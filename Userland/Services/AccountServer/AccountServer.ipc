@@ -1,0 +1,7 @@
+endpoint AccountServer
+{
+    request_user_password_update(i32 promise_id, i32 target_user_id, i32 active_user_id, i32 window_server_client_id, i32 window_id) =|
+    request_user_deletion(i32 promise_id, i32 target_user_id, i32 active_user_id, i32 window_server_client_id, i32 window_id) =|
+
+    expose_window_server_client_id() => (i32 client_id)
+}
