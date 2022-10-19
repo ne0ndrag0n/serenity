@@ -1,0 +1,35 @@
+endpoint AccountServer
+{
+    request_user_settings_update(
+        i32 promise_id,
+        i32 target_user_id,
+        i32 window_server_client_id,
+        i32 window_id,
+        String preferred_shell,
+        String gecos,
+        u32 primary_gid,
+        Vector<u32> secondary_gids
+    ) =|
+
+    request_user_password_update(
+        i32 promise_id,
+        i32 target_user_id,
+        i32 window_server_client_id,
+        i32 window_id
+    ) =|
+
+    request_user_deletion(
+        i32 promise_id,
+        i32 target_user_id,
+        i32 window_server_client_id,
+        i32 window_id
+    ) =|
+
+    request_user_addition(
+        i32 promise_id,
+        i32 window_server_client_id,
+        i32 window_id
+    ) =|
+
+    expose_window_server_client_id() => (i32 client_id)
+}
