@@ -104,7 +104,8 @@ void Service::handle_socket_connection()
 
         int accepted_fd = maybe_accepted_fd.release_value();
         // FIXME: Propagate errors
-        MUST(determine_account(accepted_fd));
+        if (m_inherits_uid)
+            MUST(determine_account(accepted_fd));
         spawn(accepted_fd);
         close(accepted_fd);
     } else {
@@ -312,6 +313,7 @@ Service::Service(Core::ConfigFile const& config, StringView name)
     m_system_modes = config.read_entry(name, "SystemModes", "graphical").split(',');
     m_multi_instance = config.read_bool_entry(name, "MultiInstance");
     m_accept_socket_connections = config.read_bool_entry(name, "AcceptSocketConnections");
+    m_inherits_uid = config.read_bool_entry(name, "InheritsUid", true);
 
     String socket_entry = config.read_entry(name, "Socket");
     String socket_permissions_entry = config.read_entry(name, "SocketPermissions", "0600");
