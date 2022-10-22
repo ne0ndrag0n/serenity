@@ -60,6 +60,9 @@ private:
     // (and not listening) socket to the service. This requires a multi-instance
     // service.
     bool m_accept_socket_connections { false };
+    // Whether accepting a connection on the socket should inherit the UID of the
+    // sending process.
+    bool m_inherits_uid { true };
     // Whether we should only spawn this service once somebody connects to the socket.
     bool m_lazy;
     // The name of the user we should run this service as.

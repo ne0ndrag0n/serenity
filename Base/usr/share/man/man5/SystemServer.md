@@ -32,12 +32,14 @@ describing how to launch and manage this service.
 * `Environment` - a space-separated list of "variable=value" pairs to set in the environment for the service.
 * `MultiInstance` - whether multiple instances of the service can be running simultaneously.
 * `AcceptSocketConnections` - whether SystemServer should accept connections on the socket, and spawn an instance of the service for each client connection.
+* `InheritsUid` - whether SystemServer should assign the UID of the sending process when accepting a connection on the socket. The default value is "true".
 
 Note that:
 * `Lazy` requires `Socket`, but only one socket must be defined.
 * `SocketPermissions` require a `Socket`.
 * `MultiInstance` conflicts with `KeepAlive`.
 * `AcceptSocketConnections` requires `Socket` (only one), `Lazy`, and `MultiInstance`.
+* `InheritsUid` requires `AcceptSocketConnections` and conflicts with `User`.
 
 ## Environment
 
