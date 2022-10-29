@@ -64,6 +64,8 @@ chmod -R g+rX,o+rX "$SERENITY_SOURCE_DIR"/Base/* mnt/
 chmod 660 mnt/etc/WindowServer.ini
 chown $window_uid:$window_gid mnt/etc/WindowServer.ini
 echo "/bin/sh" > mnt/etc/shells
+echo "/bin/Shell" >> mnt/etc/shells
+echo "/bin/false" >> mnt/etc/shells
 
 if [ -f mnt/bin/su ]; then
     chown 0:$wheel_gid mnt/bin/su
@@ -154,7 +156,7 @@ mkdir -p mnt/home/anon
 mkdir -p mnt/home/anon/Desktop
 mkdir -p mnt/home/anon/Downloads
 mkdir -p mnt/home/nona
-rm -fr mnt/home/anon/Tests/js-tests mnt/home/anon/Tests/web-tests mnt/home/anon/Tests/cpp-tests mnt/home/anon/Tests/wasm-tests 
+rm -fr mnt/home/anon/Tests/js-tests mnt/home/anon/Tests/web-tests mnt/home/anon/Tests/cpp-tests mnt/home/anon/Tests/wasm-tests
 mkdir -p mnt/home/anon/Tests/cpp-tests/
 cp "$SERENITY_SOURCE_DIR"/README.md mnt/home/anon/
 cp -r "$SERENITY_SOURCE_DIR"/Userland/Libraries/LibJS/Tests mnt/home/anon/Tests/js-tests
