@@ -239,7 +239,7 @@ if [ -z "$SERENITY_HOST_IP" ]; then
 fi
 
 if [ -z "$SERENITY_DISABLE_GDB_SOCKET" ]; then
-    SERENITY_EXTRA_QEMU_ARGS="$SERENITY_EXTRA_QEMU_ARGS -gdb tcp:${SERENITY_HOST_IP}:1234"
+    SERENITY_EXTRA_QEMU_ARGS="$SERENITY_EXTRA_QEMU_ARGS"
 fi
 
 if [ -z "$SERENITY_ETHERNET_DEVICE_TYPE" ]; then
@@ -312,18 +312,18 @@ $SERENITY_MACHINE
 $SERENITY_SPICE_SERVER_CHARDEV
 "
 
-if [ "$SERENITY_ARCH" != "aarch64" ]; then
-    if "${SERENITY_QEMU_BIN}" -chardev help | grep -iq spice; then
-        SERENITY_COMMON_QEMU_ARGS="$SERENITY_COMMON_QEMU_ARGS
-        -spice port=5930,agent-mouse=off,disable-ticketing=on
-        "
-    fi
-    if "${SERENITY_QEMU_BIN}" -chardev help | grep -iq 'spice\|vdagent'; then
-        SERENITY_COMMON_QEMU_ARGS="$SERENITY_COMMON_QEMU_ARGS
-        -device virtserialport,chardev=vdagent,nr=1
-        "
-    fi
-fi
+#if [ "$SERENITY_ARCH" != "aarch64" ]; then
+#    if "${SERENITY_QEMU_BIN}" -chardev help | grep -iq spice; then
+#        SERENITY_COMMON_QEMU_ARGS="$SERENITY_COMMON_QEMU_ARGS
+#        -spice port=5930,agent-mouse=off,disable-ticketing=on
+#        "
+#    fi
+#    if "${SERENITY_QEMU_BIN}" -chardev help | grep -iq 'spice\|vdagent'; then
+#        SERENITY_COMMON_QEMU_ARGS="$SERENITY_COMMON_QEMU_ARGS
+#        -device virtserialport,chardev=vdagent,nr=1
+#        "
+#    fi
+#fi
 
 [ -z "$SERENITY_COMMON_QEMU_ISA_PC_ARGS" ] && SERENITY_COMMON_QEMU_ISA_PC_ARGS="
 $SERENITY_EXTRA_QEMU_ARGS
