@@ -53,16 +53,7 @@ WizardDialog::WizardDialog(Window* parent_window)
 
     m_next_button = nav_container_widget.add<DialogButton>("Next >");
     m_next_button->on_click = [&](auto) {
-        VERIFY(has_pages());
-
-        if (!current_page().can_go_next())
-            return done(ExecResult::OK);
-
-        auto next_page = current_page().next_page();
-        if (!next_page)
-            return done(ExecResult::OK);
-
-        push_page(*next_page);
+        handle_next();
     };
 
     auto& button_spacer = nav_container_widget.add<Widget>();
@@ -133,6 +124,20 @@ AbstractWizardPage& WizardDialog::current_page()
 {
     VERIFY(has_pages());
     return m_page_stack.last();
+}
+
+void WizardDialog::handle_next()
+{
+    VERIFY(has_pages());
+
+    if (!current_page().can_go_next())
+        return done(ExecResult::OK);
+
+    auto next_page = current_page().next_page();
+    if (!next_page)
+        return done(ExecResult::OK);
+
+    push_page(*next_page);
 }
 
 void WizardDialog::handle_cancel()

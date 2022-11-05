@@ -39,6 +39,7 @@ public:
 protected:
     WizardDialog(Window* parent_window);
 
+    virtual void handle_next();
     virtual void handle_cancel();
 
 private:
