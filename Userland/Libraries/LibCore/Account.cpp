@@ -16,7 +16,7 @@
 #include <errno.h>
 #include <grp.h>
 #include <pwd.h>
-#ifndef AK_OS_BSD_GENERIC
+#if !defined(AK_OS_BSD_GENERIC) && !defined(AK_OS_WINDOWS) && !defined(AK_OS_ANDROID)
 #    include <crypt.h>
 #    include <shadow.h>
 #endif
@@ -62,7 +62,7 @@ ErrorOr<Account> Account::from_passwd(passwd const& pwd, spwd const& spwd)
 {
     Account account(pwd, spwd, get_extra_gids(pwd));
     endpwent();
-#ifndef AK_OS_BSD_GENERIC
+#if !defined(AK_OS_BSD_GENERIC) && !defined(AK_OS_WINDOWS) && !defined(AK_OS_ANDROID)
     endspent();
 #endif
     return account;
@@ -77,7 +77,7 @@ ErrorOr<Account> Account::self([[maybe_unused]] Read options)
         return Error::from_string_literal("No such user");
 
     spwd spwd = {};
-#ifndef AK_OS_BSD_GENERIC
+#if !defined(AK_OS_BSD_GENERIC) && !defined(AK_OS_WINDOWS) && !defined(AK_OS_ANDROID)
     if (options != Read::PasswdOnly) {
         auto maybe_spwd = TRY(Core::System::getspnam({ pwd->pw_name, strlen(pwd->pw_name) }));
         if (!maybe_spwd.has_value())
@@ -96,7 +96,7 @@ ErrorOr<Account> Account::from_name(StringView username, [[maybe_unused]] Read o
         return Error::from_string_literal("No such user");
 
     spwd spwd = {};
-#ifndef AK_OS_BSD_GENERIC
+#if !defined(AK_OS_BSD_GENERIC) && !defined(AK_OS_WINDOWS) && !defined(AK_OS_ANDROID)
     if (options != Read::PasswdOnly) {
         auto maybe_spwd = TRY(Core::System::getspnam({ pwd->pw_name, strlen(pwd->pw_name) }));
         if (!maybe_spwd.has_value())
@@ -114,7 +114,7 @@ ErrorOr<Account> Account::from_uid(uid_t uid, [[maybe_unused]] Read options)
         return Error::from_string_literal("No such user");
 
     spwd spwd = {};
-#ifndef AK_OS_BSD_GENERIC
+#if !defined(AK_OS_BSD_GENERIC) && !defined(AK_OS_WINDOWS) && !defined(AK_OS_ANDROID)
     if (options != Read::PasswdOnly) {
         auto maybe_spwd = TRY(Core::System::getspnam({ pwd->pw_name, strlen(pwd->pw_name) }));
         if (!maybe_spwd.has_value())
@@ -135,7 +135,7 @@ ErrorOr<Vector<Account>> Account::all([[maybe_unused]] Read options)
     while (auto const* pwd = getpwent()) {
         spwd spwd = {};
 
-#ifndef AK_OS_BSD_GENERIC
+#if !defined(AK_OS_BSD_GENERIC) && !defined(AK_OS_WINDOWS) && !defined(AK_OS_ANDROID)
         ScopeGuard spent_guard([] { endspent(); });
         if (options != Read::PasswdOnly) {
             auto maybe_spwd = TRY(Core::System::getspnam({ pwd->pw_name, strlen(pwd->pw_name) }));
@@ -244,7 +244,7 @@ ErrorOr<String> Account::generate_passwd_file() const
     return builder.to_string();
 }
 
-#ifndef AK_OS_BSD_GENERIC
+#if !defined(AK_OS_BSD_GENERIC) && !defined(AK_OS_WINDOWS) && !defined(AK_OS_ANDROID)
 ErrorOr<String> Account::generate_shadow_file() const
 {
     StringBuilder builder;
@@ -291,7 +291,7 @@ ErrorOr<void> Account::sync()
     Core::UmaskScope umask_scope(0777);
 
     auto new_passwd_file_content = TRY(generate_passwd_file());
-#ifndef AK_OS_BSD_GENERIC
+#if !defined(AK_OS_BSD_GENERIC) && !defined(AK_OS_WINDOWS) && !defined(AK_OS_ANDROID)
     auto new_shadow_file_content = TRY(generate_shadow_file());
 #endif
 
@@ -299,7 +299,7 @@ ErrorOr<void> Account::sync()
     //        Make this code less char-pointery.
     char new_passwd_name[] = "/etc/passwd.XXXXXX";
     size_t new_passwd_name_length = strlen(new_passwd_name);
-#ifndef AK_OS_BSD_GENERIC
+#if !defined(AK_OS_BSD_GENERIC) && !defined(AK_OS_WINDOWS) && !defined(AK_OS_ANDROID)
     char new_shadow_name[] = "/etc/shadow.XXXXXX";
     size_t new_shadow_name_length = strlen(new_shadow_name);
 #endif
@@ -309,7 +309,7 @@ ErrorOr<void> Account::sync()
         ScopeGuard new_passwd_fd_guard = [new_passwd_fd] { close(new_passwd_fd); };
         TRY(Core::System::fchmod(new_passwd_fd, 0644));
 
-#ifndef AK_OS_BSD_GENERIC
+#if !defined(AK_OS_BSD_GENERIC) && !defined(AK_OS_WINDOWS) && !defined(AK_OS_ANDROID)
         auto new_shadow_fd = TRY(Core::System::mkstemp({ new_shadow_name, new_shadow_name_length }));
         ScopeGuard new_shadow_fd_guard = [new_shadow_fd] { close(new_shadow_fd); };
         TRY(Core::System::fchmod(new_shadow_fd, 0600));
@@ -318,14 +318,14 @@ ErrorOr<void> Account::sync()
         auto nwritten = TRY(Core::System::write(new_passwd_fd, new_passwd_file_content.bytes()));
         VERIFY(static_cast<size_t>(nwritten) == new_passwd_file_content.length());
 
-#ifndef AK_OS_BSD_GENERIC
+#if !defined(AK_OS_BSD_GENERIC) && !defined(AK_OS_WINDOWS) && !defined(AK_OS_ANDROID)
         nwritten = TRY(Core::System::write(new_shadow_fd, new_shadow_file_content.bytes()));
         VERIFY(static_cast<size_t>(nwritten) == new_shadow_file_content.length());
 #endif
     }
 
     TRY(Core::System::rename({ new_passwd_name, new_passwd_name_length }, "/etc/passwd"sv));
-#ifndef AK_OS_BSD_GENERIC
+#if !defined(AK_OS_BSD_GENERIC) && !defined(AK_OS_WINDOWS) && !defined(AK_OS_ANDROID)
     TRY(Core::System::rename({ new_shadow_name, new_shadow_name_length }, "/etc/shadow"sv));
 #endif
 
