@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <AK/Function.h>
 #include <AK/HashMap.h>
 #include <LibGUI/Button.h>
 #include <LibGUI/TabWidget.h>
@@ -63,6 +64,9 @@ public:
     void reset_default_values();
 
     void set_modified(bool);
+    void set_quit_on_close(bool);
+
+    Function<bool()> on_settings_applied;
 
 private:
     SettingsWindow() = default;
@@ -74,6 +78,8 @@ private:
     RefPtr<GUI::Button> m_cancel_button;
     RefPtr<GUI::Button> m_apply_button;
     RefPtr<GUI::Button> m_reset_button;
+
+    bool m_quit_on_close { true };
 };
 
 }
