@@ -63,6 +63,7 @@ public:
     void reset_default_values();
 
     void set_modified(bool);
+    void set_quit_on_close(bool);
 
 private:
     SettingsWindow() = default;
@@ -74,6 +75,8 @@ private:
     RefPtr<GUI::Button> m_cancel_button;
     RefPtr<GUI::Button> m_apply_button;
     RefPtr<GUI::Button> m_reset_button;
+
+    bool m_quit_on_close { true };
 };
 
 }
