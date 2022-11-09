@@ -23,6 +23,11 @@ void SettingsWindow::set_modified(bool modified)
         m_apply_button->set_enabled(modified);
 }
 
+void SettingsWindow::set_quit_on_close(bool quit_on_close)
+{
+    m_quit_on_close = quit_on_close;
+}
+
 ErrorOr<NonnullRefPtr<SettingsWindow>> SettingsWindow::create(String title, ShowDefaultsButton show_defaults_button)
 {
     auto window = TRY(SettingsWindow::try_create());
@@ -57,13 +62,19 @@ ErrorOr<NonnullRefPtr<SettingsWindow>> SettingsWindow::create(String title, Show
     window->m_ok_button = TRY(button_container->try_add<GUI::DialogButton>("OK"));
     window->m_ok_button->on_click = [window = window->make_weak_ptr<SettingsWindow>()](auto) mutable {
         window->apply_settings();
-        GUI::Application::the()->quit();
+        if (window->m_quit_on_close)
+            GUI::Application::the()->quit();
+        else
+            window->close();
     };
 
     window->m_cancel_button = TRY(button_container->try_add<GUI::DialogButton>("Cancel"));
     window->m_cancel_button->on_click = [window = window->make_weak_ptr<SettingsWindow>()](auto) mutable {
         window->cancel_settings();
-        GUI::Application::the()->quit();
+        if (window->m_quit_on_close)
+            GUI::Application::the()->quit();
+        else
+            window->close();
     };
 
     window->m_apply_button = TRY(button_container->try_add<GUI::DialogButton>("Apply"));
