@@ -1,8 +1,12 @@
+#include <AccountServer/UserConfiguration.h>
+
 endpoint AccountServer
 {
     request_user_password_update(i32 promise_id, i32 target_user_id, i32 su_user_id, i32 window_server_client_id, i32 window_id) =|
     request_user_deletion(i32 promise_id, i32 target_user_id, i32 su_user_id, i32 window_server_client_id, i32 window_id) =|
     request_user_addition(i32 promise_id, i32 su_user_id, i32 window_server_client_id, i32 window_id) =|
+
+    request_user_settings_update(UserConfiguration user_configuration) =|
 
     expose_window_server_client_id() => (i32 client_id)
 }

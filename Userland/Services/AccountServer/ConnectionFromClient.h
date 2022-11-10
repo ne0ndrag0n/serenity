@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "UserConfiguration.h"
 #include <AK/Error.h>
 #include <AK/NonnullOwnPtr.h>
 #include <AK/RefPtr.h>
@@ -53,6 +54,7 @@ private:
     virtual void request_user_password_update(i32 promise_id, i32 target_user_id, i32 su_user_id, i32 window_server_client_id, i32 window_id) override;
     virtual void request_user_deletion(i32 promise_id, i32 target_user_id, i32 su_user_id, i32 window_server_client_id, i32 window_id) override;
     virtual void request_user_addition(i32 promise_id, i32 su_user_id, i32 window_server_client_id, i32 window_id) override;
+    virtual void request_user_settings_update(UserConfiguration const& user_configuration) override;
 
     virtual Messages::AccountServer::ExposeWindowServerClientIdResponse expose_window_server_client_id() override;
 };
