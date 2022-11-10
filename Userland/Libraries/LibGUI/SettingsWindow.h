@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <AK/Function.h>
 #include <AK/HashMap.h>
 #include <LibGUI/Button.h>
 #include <LibGUI/TabWidget.h>
@@ -64,6 +65,8 @@ public:
 
     void set_modified(bool);
     void set_quit_on_close(bool);
+
+    Function<void()> on_settings_applied;
 
 private:
     SettingsWindow() = default;

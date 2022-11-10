@@ -121,6 +121,10 @@ void SettingsWindow::apply_settings()
 {
     for (auto& [id, tab] : m_tabs)
         tab->apply_settings();
+
+    if (on_settings_applied)
+        on_settings_applied();
+
     set_modified(false);
 }
 
