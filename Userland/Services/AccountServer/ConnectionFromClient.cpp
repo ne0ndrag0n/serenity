@@ -212,6 +212,11 @@ void ConnectionFromClient::request_user_addition(i32 promise_id, i32 su_user_id,
     async_user_added(promise_id, -1);
 }
 
+void ConnectionFromClient::request_user_settings_update(AccountServer::UserConfiguration const& user_configuration)
+{
+
+}
+
 Messages::AccountServer::ExposeWindowServerClientIdResponse ConnectionFromClient::expose_window_server_client_id()
 {
     return GUI::ConnectionToWindowServer::the().expose_client_id();
