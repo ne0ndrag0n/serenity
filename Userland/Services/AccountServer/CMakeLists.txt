@@ -16,6 +16,7 @@ set(SOURCES
     ConnectionFromClient.cpp
     PasswordChangeDialog.cpp
     AddUserWizardDialog.cpp
+    UserConfiguration.cpp
     main.cpp
 )
 
